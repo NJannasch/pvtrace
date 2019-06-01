@@ -21,7 +21,7 @@ class Box(Mesh):
         
     """
     
-    def __init__(self, size, material=None):
+    def __init__(self, size, material=None, coating=None):
         """ Parameters
             ----------
             size : tuple of float
@@ -29,8 +29,15 @@ class Box(Mesh):
         """
         self._size = np.array(size)
         mesh = trimesh.creation.box(size)
-        super(Box, self).__init__(mesh,  material=material)
+        super(Box, self).__init__(mesh,  material=material, coating=coating)
 
+    @property
+    def size(self):
+        return np.array(self._size)
+    
+    @size.setter
+    def size(self, new_value):
+        self._size = np.array(new_value)
 
 # class Box(Geometry):
 #     """Defines a box of length, width and height with centre (0, 0, 0).

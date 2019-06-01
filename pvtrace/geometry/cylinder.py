@@ -11,11 +11,12 @@ class Cylinder(Geometry):
     along the z axis.
     """
 
-    def __init__(self, length, radius, material=None):
+    def __init__(self, length, radius, material=None, coating=None):
         super(Cylinder, self).__init__()
         self.length = length
         self.radius = radius
         self._material = material
+        self._coating = coating
 
     @property
     def material(self):
@@ -24,7 +25,15 @@ class Cylinder(Geometry):
     @material.setter
     def set_material(self, new_value):
         self._material = new_value
-        
+
+    @property
+    def coating(self):
+        return self._coating
+    
+    @coating.setter
+    def set_coating(self, new_value):
+        self._coating = new_value
+
     def is_on_surface(self, point):
         # Just use any direction for a fake ray, we only need the distance
         _, dist = ray_z_cylinder(self.length, self.radius, point, norm((1,1,1)))

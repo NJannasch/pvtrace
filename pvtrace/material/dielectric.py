@@ -210,8 +210,3 @@ class LossyDielectric(Absorptive, Dielectric):
         )
         return cls(refractive_index, absorption_coefficient)
 
-    def get_interaction_material(self, wavelength: float) -> Material:
-        """ This method is needed to distinguish between multiple lumophores objects
-            when they are used with the Host material type.
-        """
-        return self

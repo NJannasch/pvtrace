@@ -203,13 +203,16 @@ def step(ray, points, nodes, renderer=None):
                 renderer.add_ray_path([_ray, ray])
                 _ray = ray
             yield ray, decision
-        # Avoid error checks in production
-        if __debug__:
-            local_ray = ray.representation(surface_node.root, surface_node)
-            if surface_node.geometry.is_on_surface(local_ray.position):
-                logger.warning("(before) pos: {}".format(before_ray.position))
-                logger.warning("(after) pos: {}".format(ray.position))
-                raise TraceError("After tracing a surface the ray cannot still be on the surface.")
+        
+        if ray.is_alive:
+            # Avoid error checks in production
+            if __debug__:
+                local_ray = ray.representation(surface_node.root, surface_node)
+                if surface_node.geometry.is_on_surface(local_ray.position):
+                    logger.warning("(before) pos: {}".format(before_ray.position))
+                    logger.warning("(after) pos: {}".format(ray.position))
+                    import pdb; pdb.set_trace()
+                    raise TraceError("After tracing a surface the ray cannot still be on the surface.")
 
 def trace_path(ray, container_node, distance):
     """ Trace the ray through the material of the container node.
@@ -277,10 +280,23 @@ def trace_surface(ray, container_node, to_node, surface_node):
     local_ray = ray.representation(
         surface_node.root, surface_node
     )
-    for local_ray, decision in surface_node.geometry.material.trace_surface(
-        local_ray, container_node.geometry, to_node.geometry, surface_node.geometry):
-        new_ray = local_ray.representation(
-            surface_node, surface_node.root
+    if surface_node.geometry.coating.is_hit(local_ray, surface_node.geometry):
+        new_ray, decision = surface_node.geometry.material.trace_coating(
+            local_ray,
+            container_node.geometry,
+            to_node.geometry,
+            surface_node.geometry
         )
         yield new_ray, decision
+    else:
+        for local_ray, decision in surface_node.geometry.material.trace_surface(
+                local_ray,
+                container_node.geometry,
+                to_node.geometry,
+                surface_node.geometry
+            ):
+            new_ray = local_ray.representation(
+                surface_node, surface_node.root
+            )
+            yield new_ray, decision
 

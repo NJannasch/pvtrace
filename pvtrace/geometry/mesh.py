@@ -11,11 +11,12 @@ class Mesh(Geometry):
     """ Wrapper making trimesh conform to the pvtrace Geometry protocol.
     """
     
-    def __init__(self, trimesh, material=None):
+    def __init__(self, trimesh, material=None, coating=None):
         super(Mesh, self).__init__()
         trimesh.vertices -= trimesh.center_mass
         self.trimesh = trimesh
         self._material = material
+        self._coating = coating
 
     @property
     def material(self):
@@ -24,6 +25,14 @@ class Mesh(Geometry):
     @material.setter
     def material(self, new_value):
         self._material = new_value
+
+    @property
+    def coating(self):
+        return self._coating
+    
+    @coating.setter
+    def coating(self, new_value):
+        self._coating = new_value
 
     def contains(self, point: tuple) -> bool:
         """ Return True if the point is inside the shape.

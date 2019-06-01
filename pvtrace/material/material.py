@@ -150,4 +150,19 @@ class Material(object):
         logger.debug("Material.trace_path args: {}".format((local_ray, container_geometry, distance)))
         new_ray = TravelPath().transform(local_ray, {"distance": distance})
         yield new_ray, Decision.TRAVEL
+    
+    def trace_coating(
+        self,
+        local_ray: "Ray",
+        from_geometry: "Geometry",
+        to_geometry: "Geometry",
+        surface_geometry: "Geometry"
+    ) -> Tuple[Decision, dict]:
+        normal = surface_geometry.normal(local_ray.position)
+        new_ray, decision = surface_geometry.coating.transform(
+            surface_geometry,
+            local_ray,
+            {"normal": normal}
+        )
+        return new_ray, decision
 

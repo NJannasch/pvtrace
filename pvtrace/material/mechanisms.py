@@ -3,6 +3,7 @@ have with materials. Material objects are build up from these basic
 interactions.
 """
 import abc
+from typing import Optional
 from dataclasses import replace
 from enum import Enum, unique
 import numpy as np
@@ -43,6 +44,15 @@ class Mechanism(abc.ABC):
         return self.__class__.__name__
 
 
+class Reflection(Mechanism):
+    """ User supplied surface reflectivity.
+    """
+    def reflectivity(self, wavelength: float, angle: float, n1: Optional[float], n2: Optional[float]) -> float:
+        """ Probability of reflection.
+        
+            Parameters
+            ----------
+        """
 class FresnelReflection(Mechanism):
     """ A frensel reflection interaction which alters the rays direction.
     """

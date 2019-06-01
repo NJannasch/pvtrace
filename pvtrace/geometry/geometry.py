@@ -15,7 +15,7 @@ class Geometry(abc.ABC):
     @property
     @abc.abstractmethod
     def material(self):
-        """ Return the material attached to this node.
+        """ Return the material attached to this geometry.
         """
         pass
 
@@ -23,6 +23,20 @@ class Geometry(abc.ABC):
     @abc.abstractmethod
     def material(self, new_value):
         """ Sets the material.
+        """
+        pass
+
+    @property
+    @abc.abstractmethod
+    def coating(self):
+        """ Return the coating attached to this geometry.
+        """
+        pass
+
+    @coating.setter
+    @abc.abstractmethod
+    def coating(self, new_value):
+        """ Sets the geometry.
         """
         pass
 

@@ -10,10 +10,11 @@ class Sphere(Geometry):
     in it's own coordinate system.
     """
 
-    def __init__(self, radius, material=None):
+    def __init__(self, radius, material=None, coating=None):
         super(Sphere, self).__init__()
         self.radius = radius
         self._material = material
+        self._coating = coating
 
     @property
     def material(self):
@@ -22,6 +23,14 @@ class Sphere(Geometry):
     @material.setter
     def set_material(self, new_value):
         self._material = new_value
+
+    @property
+    def coating(self):
+        return self._coating
+    
+    @coating.setter
+    def set_coating(self, new_value):
+        self._coating = new_value
         
     def is_on_surface(self, point):
         r = np.sqrt(np.sum(np.array(point)**2))
