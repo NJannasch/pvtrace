@@ -1,5 +1,5 @@
 import pytest
-from typing import Tuple
+from typing import Tuple, Optional
 import numpy as np
 from dataclasses import replace
 from pvtrace.geometry.box import Box
@@ -17,14 +17,14 @@ class TopSurfaceCoating(CoatingDelegate):
         super(TopSurfaceCoating, self).__init__()
         self._base = np.array([100.0, 100.0, 1.0])
 
-    def is_coating(self, coating: Coating, geometry: Box, surface_point: Tuple[float, float, float]) -> bool:
+    def coating_identifier(self, coating: Coating, geometry: Box, surface_point: Tuple[float, float, float]) -> Optional[str]:
         if not isinstance(geometry, Box):
             raise ValueError("Requires a box geometry.")
         zmax = geometry.size[2] * 0.5
         z = surface_point[2]
         if np.isclose(z, zmax):
             return "COATING"
-        return None
+        return None  # Is not a coating
 
     def event_probabilities(self, coating: Coating, geometry: Box, coating_identifier: str, ray: Ray, normal: Tuple[float, float, float], angle: float) -> Tuple:
         p = np.array(self._base)
@@ -52,13 +52,14 @@ def test_delegation():
     coating = Coating(delegate=delegate)
     geometry = Box((1.0, 1.0, 1.0), material=None, coating=coating)
     assert coating == geometry.coating
-    assert delegate.is_coating(coating, geometry, (0.0, 0.0, 0.5)) == True
-    assert delegate.is_coating(coating, geometry, (0.0, 0.0, 0.6)) == False
+    assert delegate.coating_identifier(coating, geometry, (0.0, 0.0, 0.5)) == "COATING"
+    assert delegate.coating_identifier(coating, geometry, (0.0, 0.0, 0.6)) is None
     delegate._base = [0.0, 1.0, 0.0]
     assert np.allclose(
         delegate.event_probabilities(
             coating, 
             geometry,
+            "COATING",  # identifier
             None,  # Ray
             None,  # normal
             None   # angle
