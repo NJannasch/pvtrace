@@ -51,6 +51,20 @@ class Scene(object):
                 found_nodes.append(node)
         return found_nodes
 
+    def emit(self, count, light_node=None):
+        if light_node is None:
+            light_nodes = self.light_nodes
+            emitted_count = 0
+            while emitted_count < count:
+                for l in self.light_nodes:
+                    for ray in l.emit(1):
+                        yield ray
+                        emitted_count += 1
+        else:
+            for ray in light_node.light.emit(count):
+                ray = ray.representation(light_node, self.root)
+                yield ray
+
     def intersections(self, ray_origin, ray_direction) -> Sequence[Tuple[Node, Tuple]]:
         """ Intersections with ray and scene. Ray is defined in the root node's
         coordinate system.
