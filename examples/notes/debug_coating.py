@@ -98,20 +98,34 @@ lsc.geometry = Box(
     coating=Coating(delegate=BoxCoatingDelegate())
 )
 
-# Light source
-light = Light(
-    divergence_delegate=functools.partial(
-        Light.cone_divergence,
-        np.radians(20)
+# Light source hitting top surface
+light_node1 = Node(
+    name='light top',
+    parent=world_node,
+    location=(0.0, 0.0, 1.0),
+    light=Light(
+        divergence_delegate=functools.partial(
+            Light.cone_divergence,
+            np.radians(20)
+        )
     )
 )
-light_node = Node(
-    name='light',
+light_node1.rotate(np.radians(180), (1, 0, 0))
+
+# Light node hitting an edge surface
+light_node2 = Node(
+    name="light edge",
     parent=world_node,
-    location=(0.0, 0.0, 1.0)
+    location=(2.0, 0.0, 0.0),
+    light=Light(
+        divergence_delegate=functools.partial(
+            Light.cone_divergence,
+            np.radians(5.0)
+        )
+    )
 )
-light_node.rotate(np.radians(180), (1, 0, 0))
-light_node.light = light
+light_node2.rotate(np.radians(-90), (0, 1, 0))
+
 scene = Scene(root=world_node)
 renderer = MeshcatRenderer(max_histories=None, open_browser=True)
 renderer.render(scene)
@@ -121,11 +135,10 @@ if __name__ == "__main__":
     import time
     time.sleep(0.1)
     np.random.seed(1)
-    for light_node in scene.light_nodes:
-        for ray in light.emit(20):
-            ray = ray.representation(light_node, world_node)
-            steps = photon_tracer.follow(ray, scene, renderer=renderer)
-            path, decisions = zip(*steps)
-            print(decisions)
-            renderer.add_ray_path(path)
-            time.sleep(0.1)
+    for ray in scene.emit(20):
+        steps = photon_tracer.follow(ray, scene, renderer=renderer)
+        path, decisions = zip(*steps)
+        print(list(map(lambda x: x.position, path)))
+        print(decisions)
+        renderer.add_ray_path(path)
+        time.sleep(0.1)
