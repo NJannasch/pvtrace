@@ -132,9 +132,13 @@ class Lumophore(Absorptive, Emissive, Material):
             # If the random number is less than the quantum yield then emission occurs.
             if np.random.uniform() < qy:
                 # If ray is re-emitted generate two events: ABSORB and EMIT
+                import traceback; traceback.print_stack()
+                
                 yield new_ray, Decision.ABSORB
                 # Emission occurred
                 new_ray = self._emit_mechanism.transform(new_ray, {"material": self})
+                import traceback; traceback.print_stack()
+                
                 yield new_ray, Decision.EMIT
             else:
                 # If the ray is not emitted generate one event: ABSORB

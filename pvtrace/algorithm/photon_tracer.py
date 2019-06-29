@@ -15,6 +15,7 @@ import traceback
 import logging
 logger = logging.getLogger(__name__)
 
+STEP_CHECKS = set([d for d in Decision]) - set([Decision.ABSORB])
 
 
 def follow(ray: Ray, scene: Scene, max_iters=1000, renderer=None) -> [Tuple[Ray, Decision]]:
@@ -43,8 +44,11 @@ def follow(ray: Ray, scene: Scene, max_iters=1000, renderer=None) -> [Tuple[Ray,
         points, nodes = zip(*[(x.point, x.hit) for x in intersections])
         for ray, decision in step(ray, points, nodes, renderer=renderer):
             path.append((ray, decision))
-        if points_equal(ray.position, last_ray.position) and np.allclose(ray.direction, last_ray.direction):
-            raise TraceError("Ray did not move.")
+        # Sanity checks
+        if ray.is_alive and decision in STEP_CHECKS:
+            if points_equal(ray.position, last_ray.position) and np.allclose(ray.direction, last_ray.direction):
+                import pdb; pdb.set_trace()
+                raise TraceError("Ray did not move.", {"last_ray": last_ray, "new_ray": ray, "decision": decision})
         last_ray = ray
         if idx > max_iters:
             raise TraceError("Ray got stuck.")

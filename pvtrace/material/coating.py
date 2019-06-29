@@ -8,6 +8,7 @@ from pvtrace.light.ray import Ray
 from pvtrace.material.material import Decision
 from pvtrace.material.mechanisms import FresnelReflection
 from pvtrace.geometry.utils import flip, angle_between
+from pvtrace.geometry.utils import distance_between, close_to_zero, points_equal, EPS_ZERO
 from pvtrace.common.errors import TraceError
 import logging
 logger = logging.getLogger(__name__)
@@ -138,7 +139,9 @@ class Coating(object):
         outcomes = [Decision.RETURN, Decision.TRANSIT, Decision.ABSORB]
         decision = np.random.choice(outcomes, p=p)
         if decision == Decision.ABSORB:
+            #import traceback; traceback.print_stack()
             new_ray = replace(local_ray, is_alive=False)
+            #import pdb; pdb.set_trace()
             return new_ray, decision
         elif decision == Decision.RETURN:
             if self.delegate.wants_specular_reflection(
@@ -154,4 +157,5 @@ class Coating(object):
             new_ray = self.delegate.transmit(
                 self, geometry, local_ray, normal, angle
             )
+            import traceback; traceback.print_stack()
             return new_ray, decision

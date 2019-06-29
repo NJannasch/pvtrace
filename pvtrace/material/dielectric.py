@@ -173,6 +173,7 @@ class LossyDielectric(Absorptive, Dielectric):
                 local_ray, {"distance": sampled_distance}
             )
             new_ray = replace(new_ray, is_alive=False)  # Not re-emitted
+            import traceback; traceback.print_stack()
             yield new_ray, Decision.ABSORB
             return
         new_ray = self._path_mechanism.transform(

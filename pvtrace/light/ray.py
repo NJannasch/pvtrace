@@ -72,3 +72,4 @@ class Ray:
         new_direction = from_node.vector_to_node(self.direction, to_node)
         new_ray = replace(self, position=new_position, direction=new_direction)
         return new_ray
+
