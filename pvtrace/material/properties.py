@@ -70,7 +70,7 @@ class Absorptive(object):
         """ Parameters
             ----------
             absorption_coefficient : nd.array
-                The spectrally varying refractive index as a numpy array with shape
+                The spectrally varying absorption coefficient as a numpy array with shape
                 (n, 2), where n can be any length. The first column must be the
                 wavelength in units of nanometers and the second column must be the 
                 absorption coefficient in units of 1/cm.
@@ -85,6 +85,35 @@ class Absorptive(object):
         """ Returns the refractive index at the wavelength specified in nanometers.
         """
         values = self._absorption_coefficient(nanometers)
+        if values.size == 1:
+            values = values.tolist()
+        return values
+
+
+class Diffusive(object):
+    """ A material mix-in providing an scattering coefficient characteristic.
+    """
+    
+    def __init__(self, scattering_coefficient, cone_half_angle, *args, **kwargs):
+        """ Parameters
+            ----------
+            scattering_coefficient : nd.array
+                The spectrally varying scattering coefficient as a numpy array with shape
+                (n, 2), where n can be any length. The first column must be the
+                wavelength in units of nanometers and the second column must be the 
+                scattering_coefficient in units of 1/cm.
+        """
+        super(Diffusive, self).__init__(*args, **kwargs)
+        check_spectrum_like(scattering_coefficient)
+        self._scattering_coefficient = interp1d(
+            scattering_coefficient[:, 0], scattering_coefficient[:, 1], bounds_error=True
+        )
+        self.cone_half_angle = cone_half_angle
+    
+    def scattering_coefficient(self, nanometers: Union[float, int, np.ndarray]) -> Union[float, np.ndarray]:
+        """ Returns the refractive index at the wavelength specified in nanometers.
+        """
+        values = self._scattering_coefficient(nanometers)
         if values.size == 1:
             values = values.tolist()
         return values

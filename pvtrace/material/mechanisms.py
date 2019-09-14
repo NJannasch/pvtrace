@@ -210,6 +210,43 @@ class Absorption(Mechanism):
         return new_ray
 
 
+class Scatter(Mechanism):
+    """ Optical absorption interaction which alters the rays position.
+    """
+
+    def path_length(self, wavelength: float, material: "Material") -> float:
+        """ Samples the Beer-Lambert distribution and returns the path length at which
+        the ray will be scattered. A further test is needed to compare this against the
+        known geometrical distance of the line segment to test whether scattering 
+        occurred or not.
+        """
+        from pvtrace.material.properties import Diffusive
+        if not isinstance(material, Diffusive):
+            AppError("Need an diffusive material.")
+        gamma = np.random.uniform()
+        alpha = material.scattering_coefficient(wavelength)
+        if np.isclose(alpha, 0.0):
+            return float('inf')
+        logger.info('Got alpha({}) = {}'.format(wavelength, alpha))
+        d = -np.log(1 - gamma)/alpha
+        return d
+
+    def transform(self, ray: Ray, context: dict) -> Ray:
+        """ Transform ray according to the physics of the interaction. An scattering
+            event occurred at the path length along rays trajectory.
+        """
+        _check_required_keys(set(["distance", "material"]), context)
+        distance = context["distance"]
+        material = context["material"]
+        new_ray = ray.propagate(distance)
+        from pvtrace.material.properties import Diffusive
+        if not isinstance(material, Diffusive):
+            return new_ray  # cannot scatter if not diffusive
+        new_direction = material.deflect(new_ray.direction)
+        new_ray = replace(ray, direction=new_direction)
+        return new_ray
+
+
 class Emission(Mechanism):
     """ Optical absorption interaction which alters the rays wavelength and
     direction. Emission occurs isotropically.
